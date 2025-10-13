@@ -13,6 +13,7 @@ interface Trip {
   tripNumber: string;
   destination: string;
   pieces: number;
+  pieceName?: string;
   status: "in-transit" | "delivered" | "pending" | "delayed";
   departureDate: string;
   expectedArrival: string;
@@ -54,6 +55,7 @@ export default function ProjectFormFull({ onBack, onSave, initialData }: Project
       tripNumber: `T-${String(trips.length + 1).padStart(3, '0')}`,
       destination: "",
       pieces: 0,
+      pieceName: "",
       status: "pending",
       departureDate: "",
       expectedArrival: "",
@@ -199,16 +201,17 @@ export default function ProjectFormFull({ onBack, onSave, initialData }: Project
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[10%]">Trip #</TableHead>
-                        <TableHead className="w-[15%]">Destination</TableHead>
-                        <TableHead className="w-[8%]">Pieces</TableHead>
-                        <TableHead className="w-[12%]">Status</TableHead>
-                        <TableHead className="w-[11%]">Departure</TableHead>
-                        <TableHead className="w-[11%]">Arrival</TableHead>
-                        <TableHead className="w-[11%]">Driver</TableHead>
-                        <TableHead className="w-[11%]">Truck #</TableHead>
-                        <TableHead className="w-[11%]">Trailer #</TableHead>
-                        <TableHead className="w-[6%]"></TableHead>
+                        <TableHead className="w-[8%]">Trip #</TableHead>
+                        <TableHead className="w-[12%]">Destination</TableHead>
+                        <TableHead className="w-[7%]">Pieces</TableHead>
+                        <TableHead className="w-[12%]">Piece Name</TableHead>
+                        <TableHead className="w-[10%]">Status</TableHead>
+                        <TableHead className="w-[10%]">Departure</TableHead>
+                        <TableHead className="w-[10%]">Arrival</TableHead>
+                        <TableHead className="w-[10%]">Driver</TableHead>
+                        <TableHead className="w-[10%]">Truck #</TableHead>
+                        <TableHead className="w-[10%]">Trailer #</TableHead>
+                        <TableHead className="w-[5%]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -239,6 +242,15 @@ export default function ProjectFormFull({ onBack, onSave, initialData }: Project
                               className="h-9"
                               min="0"
                               data-testid={`input-pieces-${trip.id}`}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={trip.pieceName || ""}
+                              onChange={(e) => handleTripChange(trip.id, 'pieceName', e.target.value)}
+                              placeholder="e.g., Pallets"
+                              className="h-9"
+                              data-testid={`input-piece-name-${trip.id}`}
                             />
                           </TableCell>
                           <TableCell>

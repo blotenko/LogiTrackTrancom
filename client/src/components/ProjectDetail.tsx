@@ -9,6 +9,7 @@ interface Trip {
   tripNumber: string;
   destination: string;
   pieces: number;
+  pieceName?: string;
   status: "in-transit" | "delivered" | "pending" | "delayed";
   departureDate: string;
   expectedArrival: string;
@@ -141,15 +142,16 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[10%]">Trip #</TableHead>
-                    <TableHead className="w-[18%]">Destination</TableHead>
-                    <TableHead className="w-[8%]">Pieces</TableHead>
-                    <TableHead className="w-[12%]">Status</TableHead>
-                    <TableHead className="w-[12%]">Departure</TableHead>
-                    <TableHead className="w-[12%]">Arrival</TableHead>
+                    <TableHead className="w-[8%]">Trip #</TableHead>
+                    <TableHead className="w-[14%]">Destination</TableHead>
+                    <TableHead className="w-[7%]">Pieces</TableHead>
+                    <TableHead className="w-[12%]">Piece Name</TableHead>
+                    <TableHead className="w-[11%]">Status</TableHead>
+                    <TableHead className="w-[11%]">Departure</TableHead>
+                    <TableHead className="w-[11%]">Arrival</TableHead>
                     <TableHead className="w-[10%]">Driver</TableHead>
-                    <TableHead className="w-[9%]">Truck</TableHead>
-                    <TableHead className="w-[9%]">Trailer</TableHead>
+                    <TableHead className="w-[8%]">Truck</TableHead>
+                    <TableHead className="w-[8%]">Trailer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -164,6 +166,7 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
                         </TableCell>
                         <TableCell data-testid={`text-destination-${trip.id}`}>{trip.destination}</TableCell>
                         <TableCell data-testid={`text-pieces-${trip.id}`}>{trip.pieces}</TableCell>
+                        <TableCell data-testid={`text-piece-name-${trip.id}`}>{trip.pieceName || "-"}</TableCell>
                         <TableCell>
                           <Badge className={`${config.color} gap-1`} data-testid={`badge-status-${trip.id}`}>
                             <StatusIcon className="h-3 w-3" />
