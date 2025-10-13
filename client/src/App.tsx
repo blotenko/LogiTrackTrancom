@@ -30,7 +30,9 @@ const mockProjects = [
         status: "delivered" as const,
         departureDate: "Oct 10, 2025",
         expectedArrival: "Oct 11, 2025",
-        driver: "John Smith"
+        driver: "John Smith",
+        truckNumber: "TRK-101",
+        trailerNumber: "TRL-501"
       },
       {
         id: "t2",
@@ -40,7 +42,9 @@ const mockProjects = [
         status: "in-transit" as const,
         departureDate: "Oct 11, 2025",
         expectedArrival: "Oct 12, 2025",
-        driver: "Sarah Johnson"
+        driver: "Sarah Johnson",
+        truckNumber: "TRK-102",
+        trailerNumber: "TRL-502"
       },
       {
         id: "t3",
@@ -49,7 +53,9 @@ const mockProjects = [
         pieces: 250,
         status: "pending" as const,
         departureDate: "Oct 12, 2025",
-        expectedArrival: "Oct 13, 2025"
+        expectedArrival: "Oct 13, 2025",
+        truckNumber: "TRK-103",
+        trailerNumber: "TRL-503"
       },
       {
         id: "t4",
@@ -59,7 +65,9 @@ const mockProjects = [
         status: "delayed" as const,
         departureDate: "Oct 10, 2025",
         expectedArrival: "Oct 11, 2025",
-        driver: "Mike Davis"
+        driver: "Mike Davis",
+        truckNumber: "TRK-104",
+        trailerNumber: "TRL-504"
       }
     ]
   },

@@ -13,6 +13,8 @@ interface Trip {
   departureDate: string;
   expectedArrival: string;
   driver?: string;
+  truckNumber?: string;
+  trailerNumber?: string;
 }
 
 interface ProjectDetailProps {
@@ -139,12 +141,15 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[15%]">Trip #</TableHead>
-                    <TableHead className="w-[25%]">Destination</TableHead>
-                    <TableHead className="w-[12%]">Pieces</TableHead>
-                    <TableHead className="w-[15%]">Status</TableHead>
-                    <TableHead className="w-[15%]">Departure</TableHead>
-                    <TableHead className="w-[18%]">Expected Arrival</TableHead>
+                    <TableHead className="w-[10%]">Trip #</TableHead>
+                    <TableHead className="w-[18%]">Destination</TableHead>
+                    <TableHead className="w-[8%]">Pieces</TableHead>
+                    <TableHead className="w-[12%]">Status</TableHead>
+                    <TableHead className="w-[12%]">Departure</TableHead>
+                    <TableHead className="w-[12%]">Arrival</TableHead>
+                    <TableHead className="w-[10%]">Driver</TableHead>
+                    <TableHead className="w-[9%]">Truck</TableHead>
+                    <TableHead className="w-[9%]">Trailer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -167,6 +172,9 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
                         </TableCell>
                         <TableCell className="text-muted-foreground">{trip.departureDate}</TableCell>
                         <TableCell className="text-muted-foreground">{trip.expectedArrival}</TableCell>
+                        <TableCell className="text-muted-foreground">{trip.driver || "-"}</TableCell>
+                        <TableCell className="text-muted-foreground">{trip.truckNumber || "-"}</TableCell>
+                        <TableCell className="text-muted-foreground">{trip.trailerNumber || "-"}</TableCell>
                       </TableRow>
                     );
                   })}
