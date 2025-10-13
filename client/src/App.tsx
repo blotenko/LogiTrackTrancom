@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ProjectList from "@/components/ProjectList";
-import ProjectForm from "@/components/ProjectForm";
+import ProjectFormFull from "@/components/ProjectFormFull";
 import ProjectDetail from "@/components/ProjectDetail";
 import AppHeader from "@/components/AppHeader";
 
@@ -240,6 +240,8 @@ function Router() {
       const newProject = {
         id: String(projects.length + 1),
         ...projectData,
+        totalPieces: projectData.totalPieces || 0,
+        trips: projectData.trips || [],
         createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       };
       setProjects([newProject, ...projects]);
@@ -270,13 +272,13 @@ function Router() {
         />
       )}
       {currentView === "create" && (
-        <ProjectForm
+        <ProjectFormFull
           onBack={handleBackToProjects}
           onSave={handleSaveProject}
         />
       )}
       {currentView === "edit" && editingProject && (
-        <ProjectForm
+        <ProjectFormFull
           onBack={handleBackToProjects}
           onSave={handleSaveProject}
           initialData={editingProject}
