@@ -5,7 +5,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import LoginForm from "@/components/LoginForm";
 import ProjectList from "@/components/ProjectList";
 import ProjectForm from "@/components/ProjectForm";
 import AppHeader from "@/components/AppHeader";
@@ -59,23 +58,16 @@ const mockProjects = [
   }
 ];
 
-type View = "login" | "projects" | "create" | "edit";
+type View = "projects" | "create" | "edit";
 
 function Router() {
   // TODO: Remove mock state management - for design prototype only
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState<View>("login");
+  const [currentView, setCurrentView] = useState<View>("projects");
   const [projects, setProjects] = useState(mockProjects);
   const [editingProject, setEditingProject] = useState<any>(null);
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    setCurrentView("projects");
-  };
-
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentView("login");
+    console.log('Logout clicked');
   };
 
   const handleCreateProject = () => {
@@ -108,10 +100,6 @@ function Router() {
   const handleBackToProjects = () => {
     setCurrentView("projects");
   };
-
-  if (!isAuthenticated && currentView === "login") {
-    return <LoginForm />;
-  }
 
   return (
     <>
