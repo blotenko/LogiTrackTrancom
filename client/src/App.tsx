@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { useAuth0 } from "@auth0/auth0-react";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -9,6 +9,8 @@ import ProjectList from "@/components/ProjectList";
 import ProjectFormFull from "@/components/ProjectFormFull";
 import ProjectDetail from "@/components/ProjectDetail";
 import AppHeader from "@/components/AppHeader";
+import LoginForm from "@/components/LoginForm";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 
 // TODO: Remove mock data - for design prototype only
 const mockProjects = [
@@ -206,104 +208,84 @@ const mockProjects = [
 
 type View = "projects" | "create" | "edit" | "view";
 
-function Router() {
-  // TODO: Remove mock state management - for design prototype only
-  const [currentView, setCurrentView] = useState<View>("projects");
-  const [projects, setProjects] = useState(mockProjects);
-  const [editingProject, setEditingProject] = useState<any>(null);
-  const [viewingProject, setViewingProject] = useState<any>(null);
+function ProjectsPage({ projects, setProjects }: any) {
+  const navigate = useNavigate();
+  return (
+    <ProjectList
+      projects={projects}
+      onCreateNew={() => navigate("/create")}
+      onViewProject={(id: string) => navigate(`/projects/${id}`)}
+      onEditProject={(id: string) => navigate(`/edit/${id}`)}
+    />
+  );
+}
 
-  const handleLogout = () => {
-    console.log('Logout clicked');
-  };
+function ProjectDetailPage({ projects }: any) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const project = projects.find((p: any) => p.id === id);
+  if (!project) return <NotFound />;
 
-  const handleCreateProject = () => {
-    setEditingProject(null);
-    setCurrentView("create");
-  };
+  return <ProjectDetail project={project} onBack={() => navigate("/projects")} onEdit={() => navigate(`/edit/${id}`)} />;
+}
 
-  const handleViewProject = (id: string) => {
-    const project = projects.find(p => p.id === id);
-    setViewingProject(project);
-    setCurrentView("view");
-  };
+function ProjectFormPage({ projects, setProjects }: any) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const editingProject = projects.find((p: any) => p.id === id);
 
-  const handleEditProject = (id: string) => {
-    const project = projects.find(p => p.id === id);
-    setEditingProject(project);
-    setCurrentView("edit");
-  };
-
-  const handleEditFromView = () => {
-    if (viewingProject) {
-      setEditingProject(viewingProject);
-      setCurrentView("edit");
-    }
-  };
-
-  const handleSaveProject = (projectData: any) => {
+  const handleSave = (projectData: any) => {
     if (editingProject) {
-      // Update existing project
-      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, ...projectData } : p));
+      setProjects(projects.map((p: any) => (p.id === editingProject.id ? { ...p, ...projectData } : p)));
     } else {
-      // Create new project
       const newProject = {
         id: String(projects.length + 1),
         ...projectData,
         totalPieces: projectData.totalPieces || 0,
         trips: projectData.trips || [],
-        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       };
       setProjects([newProject, ...projects]);
     }
-    setCurrentView("projects");
+    navigate("/projects");
   };
 
-  const handleBackToProjects = () => {
-    setCurrentView("projects");
-  };
-
-  return (
-    <>
-      <AppHeader userName="Sarah Johnson" onLogout={handleLogout} />
-      {currentView === "projects" && (
-        <ProjectList
-          projects={projects}
-          onCreateNew={handleCreateProject}
-          onViewProject={handleViewProject}
-          onEditProject={handleEditProject}
-        />
-      )}
-      {currentView === "view" && viewingProject && (
-        <ProjectDetail
-          project={viewingProject}
-          onBack={handleBackToProjects}
-          onEdit={handleEditFromView}
-        />
-      )}
-      {currentView === "create" && (
-        <ProjectFormFull
-          onBack={handleBackToProjects}
-          onSave={handleSaveProject}
-        />
-      )}
-      {currentView === "edit" && editingProject && (
-        <ProjectFormFull
-          onBack={handleBackToProjects}
-          onSave={handleSaveProject}
-          initialData={editingProject}
-        />
-      )}
-    </>
-  );
+  return <ProjectFormFull onBack={() => navigate("/projects")} onSave={handleSave} initialData={editingProject} />;
 }
 
 function App() {
+  const { isLoading, isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+  const [projects, setProjects] = useState(mockProjects);
+
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        {isAuthenticated ? (
+          <BrowserRouter>
+            <AppHeader userName={user?.name || "Manager"} />
+            <Routes>
+              <Route path="/" element={<Navigate to="/projects" />} />
+              <Route path="/projects" element={<ProjectsPage projects={projects} setProjects={setProjects} />} />
+              <Route path="/projects/:id" element={<ProjectDetailPage projects={projects} />} />
+              <Route path="/create" element={<ProjectFormPage projects={projects} setProjects={setProjects} />} />
+              <Route path="/edit/:id" element={<ProjectFormPage projects={projects} setProjects={setProjects} />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        ) : (
+          <div className="flex flex-col items-center mt-20">
+            <LoginForm />
+            <button
+              onClick={() => loginWithRedirect()}
+              className="bg-primary text-white px-4 py-2 rounded mt-4"
+            >
+              Login with Auth0
+            </button>
+          </div>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );

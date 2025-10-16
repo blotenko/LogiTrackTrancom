@@ -10,13 +10,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface AppHeaderProps {
   userName?: string;
-  onLogout?: () => void;
 }
 
-export default function AppHeader({ userName = "Manager", onLogout }: AppHeaderProps) {
+export default function AppHeader({ userName = "Manager" }: AppHeaderProps) {
+
+  const { user, logout, isAuthenticated } = useAuth0();
+
+   const handleLogout = () => {
+    if (isAuthenticated) {
+      logout({
+        logoutParams: {
+          returnTo: window.location.origin, // 👈 redirects back to login page
+        },
+      });
+    } else {
+      console.warn("Tried to log out, but no user is authenticated.");
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8">
@@ -48,7 +63,7 @@ export default function AppHeader({ userName = "Manager", onLogout }: AppHeaderP
                 Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout} data-testid="menu-logout">
+              <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
