@@ -7,8 +7,8 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <Auth0Provider
-    domain="dev-gtorato5cdkd8s3j.eu.auth0.com"
-    clientId="xnuslhUH4HkdOlh0QbDwL5PkdybouyF9"
+    domain={import.meta.env.VITE_AUTH0_DOMAIN}
+    clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
     authorizationParams={{ redirect_uri: window.location.origin }}
   >
     <App />
