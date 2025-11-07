@@ -7,8 +7,8 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
     <Auth0Provider
-        domain={process.env.AUTH0_DOMAIN!}
-        clientId={process.env.AUTH0_CLIENT_ID!}
+        domain="dev-gtorato5cdkd8s3j.eu.auth0.com"
+        clientId="xnuslhUH4HkdOlh0QbDwL5PkdybouyF9"
         authorizationParams={{ redirect_uri: window.location.origin }}
     >
         <App />
