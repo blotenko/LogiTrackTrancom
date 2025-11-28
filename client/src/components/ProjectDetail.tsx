@@ -32,6 +32,7 @@ interface ProjectDetailProps {
   };
   onBack?: () => void;
   onEdit?: () => void;
+  onEditTrips?: (tripId?: string) => void;
 }
 
 const statusConfig = {
@@ -57,7 +58,7 @@ const statusConfig = {
   }
 };
 
-export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetailProps) {
+export default function ProjectDetail({ project, onBack, onEdit, onEditTrips }: ProjectDetailProps) {
   const deliveredPieces = project.trips
     .filter(trip => trip.status === "delivered")
     .reduce((sum, trip) => sum + trip.pieces, 0);
@@ -134,10 +135,14 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
         </div>
 
         <Card className="shadow-md">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
             <CardTitle className="text-xl font-medium">Trip Status</CardTitle>
+            <Button variant="outline" onClick={() => onEditTrips?.()} data-testid="button-manage-trips">
+              Manage Trips
+            </Button>
           </CardHeader>
           <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Click on any row to edit that trip</p>
             <div className="border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
@@ -160,7 +165,12 @@ export default function ProjectDetail({ project, onBack, onEdit }: ProjectDetail
                     const StatusIcon = config.icon;
                     
                     return (
-                      <TableRow key={trip.id} data-testid={`row-trip-${trip.id}`}>
+                      <TableRow 
+                        key={trip.id} 
+                        data-testid={`row-trip-${trip.id}`}
+                        className="cursor-pointer hover-elevate"
+                        onClick={() => onEditTrips?.(trip.id)}
+                      >
                         <TableCell className="font-medium" data-testid={`text-trip-number-${trip.id}`}>
                           {trip.tripNumber}
                         </TableCell>
