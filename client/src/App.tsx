@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ProjectList from "@/components/ProjectList";
 import ProjectFormFull from "@/components/ProjectFormFull";
 import ProjectDetail from "@/components/ProjectDetail";
+import TripEditor from "@/components/TripEditor";
+import WindTurbineTracking from "@/components/WindTurbineTracking";
 import AppHeader from "@/components/AppHeader";
-import LoginForm from "@/components/LoginForm";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 
 // TODO: Remove mock data - for design prototype only
 const mockProjects = [
@@ -206,86 +206,149 @@ const mockProjects = [
   }
 ];
 
-type View = "projects" | "create" | "edit" | "view";
+type View = "projects" | "create" | "edit" | "view" | "trips" | "wind-tracking";
 
-function ProjectsPage({ projects, setProjects }: any) {
-  const navigate = useNavigate();
-  return (
-    <ProjectList
-      projects={projects}
-      onCreateNew={() => navigate("/create")}
-      onViewProject={(id: string) => navigate(`/projects/${id}`)}
-      onEditProject={(id: string) => navigate(`/edit/${id}`)}
-    />
-  );
-}
+function Router() {
+  // TODO: Remove mock state management - for design prototype only
+  const [currentView, setCurrentView] = useState<View>("projects");
+  const [projects, setProjects] = useState(mockProjects);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [viewingProject, setViewingProject] = useState<any>(null);
+  const [selectedTripId, setSelectedTripId] = useState<string | undefined>(undefined);
 
-function ProjectDetailPage({ projects }: any) {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const project = projects.find((p: any) => p.id === id);
-  if (!project) return <NotFound />;
+  const handleLogout = () => {
+    console.log('Logout clicked');
+  };
 
-  return <ProjectDetail project={project} onBack={() => navigate("/projects")} onEdit={() => navigate(`/edit/${id}`)} />;
-}
+  const handleCreateProject = () => {
+    setEditingProject(null);
+    setCurrentView("create");
+  };
 
-function ProjectFormPage({ projects, setProjects }: any) {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const editingProject = projects.find((p: any) => p.id === id);
+  const handleViewProject = (id: string) => {
+    const project = projects.find(p => p.id === id);
+    setViewingProject(project);
+    setCurrentView("view");
+  };
 
-  const handleSave = (projectData: any) => {
+  const handleEditProject = (id: string) => {
+    const project = projects.find(p => p.id === id);
+    setEditingProject(project);
+    setCurrentView("edit");
+  };
+
+  const handleEditFromView = () => {
+    if (viewingProject) {
+      setEditingProject(viewingProject);
+      setCurrentView("edit");
+    }
+  };
+
+  const handleSaveProject = (projectData: any) => {
     if (editingProject) {
-      setProjects(projects.map((p: any) => (p.id === editingProject.id ? { ...p, ...projectData } : p)));
+      // Update existing project
+      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, ...projectData } : p));
     } else {
+      // Create new project
       const newProject = {
         id: String(projects.length + 1),
         ...projectData,
         totalPieces: projectData.totalPieces || 0,
         trips: projectData.trips || [],
-        createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       };
       setProjects([newProject, ...projects]);
     }
-    navigate("/projects");
+    setCurrentView("projects");
   };
 
-  return <ProjectFormFull onBack={() => navigate("/projects")} onSave={handleSave} initialData={editingProject} />;
+  const handleBackToProjects = () => {
+    setCurrentView("projects");
+  };
+
+  const handleEditTrips = (tripId?: string) => {
+    setSelectedTripId(tripId);
+    setCurrentView("trips");
+  };
+
+  const handleSaveTrips = (trips: any[]) => {
+    if (viewingProject) {
+      const totalPieces = trips.reduce((sum: number, trip: any) => sum + Number(trip.pieces || 0), 0);
+      const updatedProject = { ...viewingProject, trips, totalPieces };
+      setProjects(projects.map(p => p.id === viewingProject.id ? updatedProject : p));
+      setViewingProject(updatedProject);
+    }
+  };
+
+  const handleBackToProjectView = () => {
+    setSelectedTripId(undefined);
+    setCurrentView("view");
+  };
+
+  const handleOpenWindTracking = () => {
+    setCurrentView("wind-tracking");
+  };
+
+  return (
+    <>
+      <AppHeader 
+        userName="Sarah Johnson" 
+        onLogout={handleLogout} 
+        onWindTracking={handleOpenWindTracking}
+        showWindTracking={currentView !== "wind-tracking"}
+      />
+      {currentView === "wind-tracking" && (
+        <WindTurbineTracking onBack={handleBackToProjects} />
+      )}
+      {currentView === "projects" && (
+        <ProjectList
+          projects={projects}
+          onCreateNew={handleCreateProject}
+          onViewProject={handleViewProject}
+          onEditProject={handleEditProject}
+        />
+      )}
+      {currentView === "view" && viewingProject && (
+        <ProjectDetail
+          project={viewingProject}
+          onBack={handleBackToProjects}
+          onEdit={handleEditFromView}
+          onEditTrips={handleEditTrips}
+        />
+      )}
+      {currentView === "trips" && viewingProject && (
+        <TripEditor
+          projectName={viewingProject.name}
+          projectId={viewingProject.id}
+          initialTrips={viewingProject.trips}
+          selectedTripId={selectedTripId}
+          onBack={handleBackToProjectView}
+          onSave={handleSaveTrips}
+        />
+      )}
+      {currentView === "create" && (
+        <ProjectFormFull
+          onBack={handleBackToProjects}
+          onSave={handleSaveProject}
+        />
+      )}
+      {currentView === "edit" && editingProject && (
+        <ProjectFormFull
+          onBack={handleBackToProjects}
+          onSave={handleSaveProject}
+          initialData={editingProject}
+        />
+      )}
+    </>
+  );
 }
 
 function App() {
-  const { isLoading, isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
-  const [projects, setProjects] = useState(mockProjects);
-
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        {isAuthenticated ? (
-          <BrowserRouter>
-            <AppHeader userName={user?.name || "Manager"} />
-            <Routes>
-              <Route path="/" element={<Navigate to="/projects" />} />
-              <Route path="/projects" element={<ProjectsPage projects={projects} setProjects={setProjects} />} />
-              <Route path="/projects/:id" element={<ProjectDetailPage projects={projects} />} />
-              <Route path="/create" element={<ProjectFormPage projects={projects} setProjects={setProjects} />} />
-              <Route path="/edit/:id" element={<ProjectFormPage projects={projects} setProjects={setProjects} />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        ) : (
-          <div className="flex flex-col items-center mt-20">
-            <LoginForm />
-            <button
-              onClick={() => loginWithRedirect()}
-              className="bg-primary text-white px-4 py-2 rounded mt-4"
-            >
-              Login with Auth0
-            </button>
-          </div>
-        )}
+        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );
